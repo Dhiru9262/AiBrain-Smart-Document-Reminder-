@@ -1,0 +1,17 @@
+# Node
+node_modules/
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# OCR uploads
+uploads/
+
+# Google OAuth
+google_auth.json
+
+# OS
+.DS_Store
