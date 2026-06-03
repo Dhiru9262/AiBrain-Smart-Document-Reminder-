@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { API_URL } from "../config";
 
 const UserContext = createContext(null);
 
@@ -18,7 +19,7 @@ export function UserProvider({ children }) {
   }, []);
 
   const login = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   const logout = () => {

@@ -4,10 +4,12 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error("❌ Google OAuth env variables missing");
 }
 
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:5000";
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:5000/auth/google/callback"
+  `${SERVER_URL}/auth/google/callback`
 );
 
 const calendar = google.calendar({

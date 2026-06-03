@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { API_URL } from "../config";
 
 export default function Reminders() {
   const { userEmail } = useUser();
@@ -13,7 +14,7 @@ export default function Reminders() {
     setLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/reminders?userEmail=${userEmail}`
+        `${API_URL}/reminders?userEmail=${userEmail}`
       );
       setReminders(res.data);
     } catch (err) {

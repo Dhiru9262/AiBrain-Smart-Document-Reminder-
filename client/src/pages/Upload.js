@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { API_URL } from "../config";
 
 export default function Upload() {
   const { userEmail } = useUser();
@@ -32,7 +33,7 @@ export default function Upload() {
     try {
       const formData = new FormData();
       formData.append("document", file);
-      const response = await axios.post("http://localhost:5000/process", formData);
+      const response = await axios.post(`${API_URL}/process`, formData);
       setOcrText(response.data.text);
       setDetectedDate(response.data.dueDate?.due_date || null);
       setConfidence(response.data.dueDate?.confidence || null);
@@ -50,7 +51,7 @@ export default function Upload() {
 
   const confirmDate = async () => {
     try {
-      await axios.post("http://localhost:5000/create-reminder", {
+      await axios.post(`${API_URL}/create-reminder`, {
         date: finalDate,
         documentName: file.name,
         ocrText,

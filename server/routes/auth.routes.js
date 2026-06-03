@@ -44,9 +44,8 @@ router.get("/google/callback", async (req, res) => {
 
     // 3. Redirect back to React (Frontend) with the email
     // This allows the Frontend to know who is logged in
-    res.redirect(
-      `http://localhost:3000?email=${encodeURIComponent(userEmail)}`
-    );
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    res.redirect(`${clientUrl}?email=${encodeURIComponent(userEmail)}`);
   } catch (err) {
     console.error(
       "❌ OAuth Token Exchange Error:",
