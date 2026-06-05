@@ -1,16 +1,17 @@
 const express = require("express");
-const fs = require("fs");
 const { google } = require("googleapis");
 const { oauth2Client } = require("../config/googleAuth");
+const Token = require("../models/Token");
 
 const router = express.Router();
-const oauth2 = google.oauth2("v2");
-
-let currentUserEmail = null;
 
 router.get("/google", (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
+    // Force the consent screen so Google reliably returns a refresh_token.
+    // Without this, Google omits refresh_token on repeat logins, leaving us
+    // unable to act on the user's calendar later.
+    prompt: "consent",
     scope: [
       "https://www.googleapis.com/auth/calendar",
       "https://www.googleapis.com/auth/userinfo.email",
@@ -18,12 +19,6 @@ router.get("/google", (req, res) => {
   });
   res.redirect(url);
 });
-
-// Add this to your imports at the top
-// const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-
-// const { google } = require("googleapis");
-// const { oauth2Client } = require("../config/googleAuth");
 
 router.get("/google/callback", async (req, res) => {
   try {
@@ -42,8 +37,19 @@ router.get("/google/callback", async (req, res) => {
 
     const userEmail = userInfo.data.email;
 
-    // 3. Redirect back to React (Frontend) with the email
-    // This allows the Frontend to know who is logged in
+    // 3. Persist the refresh token so we can act on this user's calendar
+    //    later, surviving server restarts/sleeps. Only overwrite when Google
+    //    actually sent a new refresh_token (it may omit it on some flows).
+    if (tokens.refresh_token) {
+      await Token.findOneAndUpdate(
+        { email: userEmail },
+        { refreshToken: tokens.refresh_token, updatedAt: new Date() },
+        { upsert: true, new: true }
+      );
+    }
+
+    // 4. Redirect back to React (Frontend) with the email so the frontend
+    //    knows who is logged in.
     const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
     res.redirect(`${clientUrl}?email=${encodeURIComponent(userEmail)}`);
   } catch (err) {

@@ -17,9 +17,22 @@ const calendar = google.calendar({
   auth: oauth2Client,
 });
 
-console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+// Build a per-request OAuth2 client authenticated as a specific user, from
+// that user's persisted refresh token. The googleapis client automatically
+// exchanges the refresh token for a fresh access token as needed, so this
+// works indefinitely without re-login — unlike the shared in-memory client.
+function createUserAuthClient(refreshToken) {
+  const client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    `${SERVER_URL}/auth/google/callback`
+  );
+  client.setCredentials({ refresh_token: refreshToken });
+  return client;
+}
 
 module.exports = {
   oauth2Client,
   calendar,
+  createUserAuthClient,
 };
